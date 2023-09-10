@@ -1,3 +1,5 @@
+import java.util.StringJoiner;
+
 public class Stack<T> {
     private Object[] data;
     private int used;
@@ -65,14 +67,11 @@ public class Stack<T> {
     @Override
     public String toString() {
         // Can't use Arrays.toString(), it'll get the null data
-        StringBuilder result = new StringBuilder("[");
-        for (int i = 0; i < used; i++) {
-            result.append(data[i]);
-            if (i < used - 1) {
-                result.append(", ");
-            }
+        StringJoiner result = new StringJoiner(", ", "[", "]");
+        for (Object item : data) {
+            if (item == null) break;
+            result.add(item.toString());
         }
-        result.append("]");
         return result.toString();
     }
 }
