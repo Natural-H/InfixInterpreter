@@ -1,6 +1,4 @@
-import java.util.HashMap;
 import java.util.Map;
-
 import static java.util.Map.entry;
 
 public class Interpreter {
@@ -14,8 +12,7 @@ public class Interpreter {
 
     static boolean isValid(String expression) {
         String normExpression = expression.toLowerCase();
-        int parenthesisCounter = 0;
-        int lastOpenedParenthesis = 0;
+        Stack<Integer> parenthesisStack = new Stack<>();
         boolean lastWasOperand = false;
 
         for (int i = 0; i < normExpression.length(); i++) {
@@ -24,17 +21,16 @@ public class Interpreter {
                 continue;
 
             if (element == '(') {
-                parenthesisCounter++;
-                lastOpenedParenthesis = i;
+                parenthesisStack.push(i);
                 lastWasOperand = false;
                 continue;
             } else if (element == ')') {
-                parenthesisCounter--;
-                if (parenthesisCounter < 0) {
+                parenthesisStack.pop(false);
+                if ((parenthesisStack.getUsed() - 1) < 0) {
                     System.out.println(
                             markErrorAt(expression,
-                                    expression.contains("(") ? lastOpenedParenthesis : i,
-                                    expression.contains("(") ? "'(' has no closing parenthesis" : "Never found a '(' character"));
+                                    i,
+                                    expression.contains("(") ? "')' has no opening parenthesis" : "Never found a '(' character"));
                     return false;
                 }
                 continue;
@@ -45,18 +41,27 @@ public class Interpreter {
                 continue;
             }
 
-            if ("+-*/^".contains(element + "") && lastWasOperand)
-            {
+            if ("+-*/^".contains(element + "") && lastWasOperand) {
                 lastWasOperand = false;
             } else {
                 System.out.println(markErrorAt(
                         expression,
                         i,
-                        lastWasOperand ? "Unexpected operand found! Expected: Operator" : "Unexpected operator found! Expected: Operand"
-                ));
+                        lastWasOperand ? "Unexpected operand found! Expected: Operator" : "Unexpected operator found! Expected: Operand")
+                );
                 return false;
             }
         }
+
+        if (!parenthesisStack.isEmpty()) {
+            System.out.println(markErrorAt(
+                    expression,
+                    parenthesisStack.getTop(),
+                    "'(' has no closing parenthesis!")
+            );
+            return false;
+        }
+
         return true;
     }
 

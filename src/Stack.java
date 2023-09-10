@@ -22,9 +22,9 @@ public class Stack<T> {
         data[used++] = item;
     }
 
-    public void pop() {
+    public void pop(boolean printError) {
         if (isEmpty()) {
-            System.out.println("Couldn't remove element, stack is empty!");
+            if (printError) System.out.println("Couldn't remove element, stack is empty!");
             return;
         }
         --used;
