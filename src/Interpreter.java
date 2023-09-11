@@ -1,19 +1,50 @@
 import java.util.Arrays;
 import java.util.Map;
-import java.util.Scanner;
 
 import static java.util.Map.entry;
 
 public class Interpreter {
-    public static final Map<String, Integer> precedenceOf = Map.ofEntries(
-            entry("+", 1),
-            entry("-", 1),
-            entry("*", 2),
-            entry("/", 2),
-            entry("^", 3),
-            entry("(", 0),
-            entry(")", 0)
+    public static final Map<Character, Integer> precedenceOf = Map.ofEntries(
+            entry('+', 1),
+            entry('-', 1),
+            entry('*', 2),
+            entry('/', 2),
+            entry('^', 3),
+            entry('(', 0),
+            entry(')', 0)
     );
+
+    static String infijaToPostfija(String infija) {
+        infija = infija.toLowerCase();
+        StringBuilder posfija = new StringBuilder();
+        Stack<Character> pila = new Stack<>();
+
+        for (int i = 0; i < infija.length(); i++) {
+            char x = infija.charAt(i);
+
+            if ((x >= 'a' && x <= 'z') || "+-*/".contains(x + "")) {
+                posfija.append(x);
+            } else if (x == '(') {
+                pila.push(x);
+            } else if (x == ')') {
+                while (!pila.isEmpty() && pila.getTop() != '(') {
+                    posfija.append(pila.pop(false));
+                }
+                pila.pop(false);
+            } else {
+                while (!pila.isEmpty() && precedenceOf.get(x) <= precedenceOf.get(pila.getTop())) {
+                    posfija.append(pila.pop(false));
+                }
+                pila.push(x);
+            }
+        }
+
+        while (!pila.isEmpty()) {
+            posfija.append(pila.pop(false));
+        }
+
+        return posfija.toString();
+    }
 
     static boolean isValid(String expression) {
         String normExpression = expression.toLowerCase();
@@ -146,7 +177,7 @@ public class Interpreter {
     }
 
     private static boolean hasHigherPrecedence(char op1, char op2) {
-        return precedenceOf.get("" + op1) > precedenceOf.get("" + op2);
+        return precedenceOf.get(op1) > precedenceOf.get(op2);
     }
 
     private static double applyOperator(char operator, double b, double a) {
