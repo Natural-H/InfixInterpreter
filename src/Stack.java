@@ -22,13 +22,15 @@ public class Stack<T> {
         data[used++] = item;
     }
 
-    public void pop(boolean printError) {
+    public T pop(boolean showError) {
         if (isEmpty()) {
-            if (printError) System.out.println("Couldn't remove element, stack is empty!");
-            return;
+            if (showError) System.out.println("Couldn't remove element, stack is empty!");
+            return null;
         }
-        --used;
+        @SuppressWarnings("unchecked")
+        T item = (T) data[--used];
         data[used] = null;
+        return item;
     }
 
     public T getTop() {
