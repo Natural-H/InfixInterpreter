@@ -22,7 +22,7 @@ public class Interpreter {
         for (int i = 0; i < infija.length(); i++) {
             char x = infija.charAt(i);
 
-            if ((x >= 'a' && x <= 'z') || "+-*/".contains(x + "")) {
+            if ((x >= 'a' && x <= 'z') || (x >= '0' && x <= '9')) {
                 posfija.append(x);
             } else if (x == '(') {
                 pila.push(x);
