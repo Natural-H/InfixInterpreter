@@ -51,6 +51,7 @@ public class Interpreter {
         Stack<Integer> parenthesisStack = new Stack<>();
         boolean lastWasOperand = false;
         int parenthesisCounter = 0;
+        int lastOperator = 0;
 
         for (int i = 0; i < normExpression.length(); i++) {
             char element = normExpression.charAt(i);
@@ -61,6 +62,7 @@ public class Interpreter {
                 parenthesisStack.push(i);
                 parenthesisCounter++;
                 lastWasOperand = false;
+
                 continue;
             } else if (element == ')') {
                 parenthesisStack.pop(false);
@@ -82,6 +84,7 @@ public class Interpreter {
 
             if ("+-*/^".contains(element + "") && lastWasOperand) {
                 lastWasOperand = false;
+                lastOperator = i;
             } else {
                 System.out.println(markErrorAt(
                         expression,
@@ -98,6 +101,16 @@ public class Interpreter {
                     parenthesisStack.getTop(),
                     "'(' has no closing parenthesis!")
             );
+            return false;
+        }
+
+        if (!lastWasOperand)
+        {
+            System.out.println(markErrorAt(
+                    expression,
+                    lastOperator,
+                    "Expression finishes with operand '%s'!".formatted(expression.charAt(lastOperator))
+            ));
             return false;
         }
 
