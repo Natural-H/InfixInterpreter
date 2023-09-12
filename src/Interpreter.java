@@ -46,7 +46,7 @@ public class Interpreter {
         return posfija.toString();
     }
 
-    static boolean isValid(String expression) {
+    public static boolean isValid(String expression) {
         String normExpression = expression.toLowerCase();
         Stack<Integer> parenthesisStack = new Stack<>();
         boolean lastWasOperand = false;
