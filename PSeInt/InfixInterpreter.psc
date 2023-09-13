@@ -42,9 +42,9 @@ SubAlgoritmo valido <- EsValido(expresion)
 					SiNo
 						Si caracterActual<>ASCII(' ') Entonces
 							Si ultimoFueOperando Entonces
-								error <- 'Operador inesperado encontrado! Se esperaba operando';
-							SiNo
 								error <- 'Operando inesperado encontrado! Se esperaba operador';
+							SiNo
+								error <- 'Operador inesperado encontrado! Se esperaba operando';
 							FinSi
 							marcarErrorEn(expresion,i,error);
 							valido <- Falso;
