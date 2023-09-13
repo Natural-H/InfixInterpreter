@@ -1,5 +1,6 @@
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Stack;
 
 import static java.util.Map.entry;
 
@@ -27,20 +28,20 @@ public class Interpreter {
             } else if (x == '(') {
                 pila.push(x);
             } else if (x == ')') {
-                while (!pila.isEmpty() && pila.getTop() != '(') {
-                    posfija.append(pila.pop(false));
+                while (!pila.isEmpty() && pila.peek() != '(') {
+                    posfija.append(pila.pop());
                 }
-                pila.pop(false);
+                pila.pop();
             } else {
-                while (!pila.isEmpty() && precedenceOf.get(x) <= precedenceOf.get(pila.getTop())) {
-                    posfija.append(pila.pop(false));
+                while (!pila.isEmpty() && precedenceOf.get(x) <= precedenceOf.get(pila.peek())) {
+                    posfija.append(pila.pop());
                 }
                 pila.push(x);
             }
         }
 
         while (!pila.isEmpty()) {
-            posfija.append(pila.pop(false));
+            posfija.append(pila.pop());
         }
 
         return posfija.toString();
@@ -50,42 +51,33 @@ public class Interpreter {
         String normExpression = expression.toLowerCase();
         Stack<Integer> parenthesisStack = new Stack<>();
         boolean lastWasOperand = false;
-        int parenthesisCounter = 0;
+//        int parenthesisCounter = 0;
         int lastOperator = 0;
 
         for (int i = 0; i < normExpression.length(); i++) {
             char element = normExpression.charAt(i);
-            if (element == ' ')
-                continue;
-
+//            parenthesisCounter++;
             if (element == '(') {
                 parenthesisStack.push(i);
-                parenthesisCounter++;
                 lastWasOperand = false;
-
-                continue;
             } else if (element == ')') {
-                parenthesisStack.pop(false);
-                parenthesisCounter--;
-                if (parenthesisCounter < 0) {
+//                parenthesisCounter--;
+//                if (parenthesisCounter < 0) {
+                if (parenthesisStack.size() - 1 <= -1) {
                     System.out.println(
                             markErrorAt(expression,
                                     i,
                                     expression.contains("(") ? "')' has no opening parenthesis!" : "Never found a '(' character!"));
                     return false;
                 }
-                continue;
-            }
-
-            if ((element >= 'a') && (element <= 'z') && !lastWasOperand) {
+                parenthesisStack.pop();
                 lastWasOperand = true;
-                continue;
-            }
-
-            if ("+-*/^".contains(element + "") && lastWasOperand) {
+            } else if ((element >= 'a') && (element <= 'z') && !lastWasOperand) {
+                lastWasOperand = true;
+            } else if ("+-*/^".contains(element + "") && lastWasOperand) {
                 lastWasOperand = false;
                 lastOperator = i;
-            } else {
+            } else if (element != ' ') {
                 System.out.println(markErrorAt(
                         expression,
                         i,
@@ -95,10 +87,11 @@ public class Interpreter {
             }
         }
 
+//        if (parenthesisCounter != 0) {
         if (!parenthesisStack.isEmpty()) {
             System.out.println(markErrorAt(
                     expression,
-                    parenthesisStack.getTop(),
+                    parenthesisStack.peek(),
                     "'(' has no closing parenthesis!")
             );
             return false;
@@ -109,7 +102,7 @@ public class Interpreter {
             System.out.println(markErrorAt(
                     expression,
                     lastOperator,
-                    "Expression finishes with operand '%s'!".formatted(expression.charAt(lastOperator))
+                    "Expression finishes with operator '%s'!".formatted(expression.charAt(lastOperator))
             ));
             return false;
         }
@@ -170,23 +163,23 @@ public class Interpreter {
             } else if (c == '(') {
                 operators.push(c);
             } else if (c == ')') {
-                while (!operators.isEmpty() && operators.getTop() != '(') {
-                    values.push(applyOperator(operators.pop(false), values.pop(false), values.pop(false)));
+                while (!operators.isEmpty() && operators.peek() != '(') {
+                    values.push(applyOperator(operators.pop(), values.pop(), values.pop()));
                 }
-                operators.pop(false); // Remove the '('
+                operators.pop(); // Remove the '('
             } else if ("+-*/^".contains(c + "")) {
-                while (!operators.isEmpty() && hasHigherPrecedence(operators.getTop(), c)) {
-                    values.push(applyOperator(operators.pop(false), values.pop(false), values.pop(false)));
+                while (!operators.isEmpty() && hasHigherPrecedence(operators.peek(), c)) {
+                    values.push(applyOperator(operators.pop(), values.pop(), values.pop()));
                 }
                 operators.push(c);
             }
         }
 
         while (!operators.isEmpty()) {
-            values.push(applyOperator(operators.pop(false), values.pop(false), values.pop(false)));
+            values.push(applyOperator(operators.pop(), values.pop(), values.pop()));
         }
 
-        return values.pop(false);
+        return values.pop();
     }
 
     private static boolean hasHigherPrecedence(char op1, char op2) {
