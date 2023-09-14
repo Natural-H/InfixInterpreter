@@ -16,35 +16,35 @@ public class Interpreter {
     );
 
     static String infijaToPostfija(String infija) {
+        String posfija = "";
+        Stack<Character> operators = new Stack<>();
         infija = infija.toLowerCase();
-        StringBuilder posfija = new StringBuilder();
-        Stack<Character> pila = new Stack<>();
 
         for (int i = 0; i < infija.length(); i++) {
             char x = infija.charAt(i);
 
             if ((x >= 'a' && x <= 'z') || (x >= '0' && x <= '9')) {
-                posfija.append(x);
+                posfija = posfija.concat(x + "");
             } else if (x == '(') {
-                pila.push(x);
+                operators.push(x);
             } else if (x == ')') {
-                while (!pila.isEmpty() && pila.peek() != '(') {
-                    posfija.append(pila.pop());
+                while (!operators.isEmpty() && operators.peek() != '(') {
+                    posfija = posfija.concat(operators.pop() + "");
                 }
-                pila.pop();
+                operators.pop();
             } else {
-                while (!pila.isEmpty() && precedenceOf.get(x) <= precedenceOf.get(pila.peek())) {
-                    posfija.append(pila.pop());
+                while (!operators.isEmpty() && precedenceOf.get(x) <= precedenceOf.get(operators.peek())) {
+                    posfija = posfija.concat(operators.pop() + "");
                 }
-                pila.push(x);
+                operators.push(x);
             }
         }
 
-        while (!pila.isEmpty()) {
-            posfija.append(pila.pop());
+        while (!operators.isEmpty()) {
+            posfija = posfija.concat(operators.pop() + "");
         }
 
-        return posfija.toString();
+        return posfija;
     }
 
     public static boolean isValid(String expression) {

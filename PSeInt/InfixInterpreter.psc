@@ -33,7 +33,7 @@ SubAlgoritmo valido <- EsValido(expresion)
 					valido <- Falso;
 				FinSi
 			SiNo
-				Si caracterActual>=ASCII('a') Y caracterActual<=ASCII('z') Y  NO ultimoFueOperando Entonces
+				Si caracterActual >= ASCII('a') Y caracterActual <= ASCII('z') Y NO ultimoFueOperando Entonces
 					ultimoFueOperando <- Verdadero;
 				SiNo
 					Si (caracterActual=ASCII('+') O caracterActual=ASCII('-') O caracterActual=ASCII('*') O caracterActual=ASCII('/') O caracterActual=ASCII('^')) Y ultimoFueOperando Entonces
