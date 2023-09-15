@@ -50,10 +50,38 @@ SubAlgoritmo valido <- EsValido(expresion)
 				FinSi
 				
 				pop(parentesisStack);
+			SiNo
+					Si (elemento <= 'a') Y (elemento >= 'z') Entonces
+						Si ultimoFueOperando Entonces
+							marcarErrorEn(expresion, i, "No se esperaba operando! Se esperaba: Operador");
+							Regresa Falso;
+						FinSi
+							
+						ultimoFueOperando <- Verdadero;
+					SiNo
+						Si elemento = '+' o elemento = '-' o elemento = '/' o elemento = '*' o elemento = '^' Entonces
+							Si no ultimoFueOperando Entonces
+								marcarErrorEn(expression, i, "No se esperaba operador! Se esperaba: Operando");
+								Regresa Falso;
+							FinSi
+							
+							ultimoFueOperando <- Falso;
+							ultimoOperador <- i;
+						SiNo
+							marcarErrorEn(expression, i, "Se encontro un caracter invalido!");
+							Regresa Falso;
+						FinSi
+					FinSi
+				FinSi
 			FinSi
-		FinSi
+		FinPara
 		
-	FinPara
+		Si vacio(parentesisStack) Entonces
+			markErrorAt(
+			expression,
+			parenthesisStack.peek(),
+			"'(' has no closing parenthesis!");
+		FinSi
 	
 FinSubAlgoritmo
 

@@ -9,6 +9,7 @@ public class Main {
             System.out.print("Give me an expression: ");
             infixExpression = sc.nextLine();
             normExpression = infixExpression.toLowerCase();
+            System.out.println("Do something!");
         } while (!Interpreter.isValid(infixExpression));
 
         System.out.println("Expresión infija: " + infixExpression);
