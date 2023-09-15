@@ -15,54 +15,67 @@ public class Interpreter {
             entry(')', 0)
     );
 
-    static String infijaToPostfija(String infija) {
-        String posfija = "";
+    static String infixToPostfix(String infix) {
+        String postfix = "";
         Stack<Character> operators = new Stack<>();
-        infija = infija.toLowerCase();
+        infix = infix.toLowerCase();
 
-        for (int i = 0; i < infija.length(); i++) {
-            char x = infija.charAt(i);
+        for (int i = 0; i < infix.length(); i++) {
+            char x = infix.charAt(i);
 
-            if ((x >= 'a' && x <= 'z') || (x >= '0' && x <= '9')) {
-                posfija = posfija.concat(x + "");
-            } else if (x == '(') {
+            if (x == ' ')
+                continue;
+
+            if ((x >= 'a' && x <= 'z'))
+                postfix = postfix.concat(x + "");
+            else if (x == '(')
                 operators.push(x);
-            } else if (x == ')') {
-                while (!operators.isEmpty() && operators.peek() != '(') {
-                    posfija = posfija.concat(operators.pop() + "");
-                }
+            else if (x == ')') {
+                while (!operators.isEmpty() && operators.peek() != '(')
+                    postfix = postfix.concat(operators.pop() + "");
+
                 operators.pop();
             } else {
-                while (!operators.isEmpty() && precedenceOf.get(x) <= precedenceOf.get(operators.peek())) {
-                    posfija = posfija.concat(operators.pop() + "");
-                }
+                while (!operators.isEmpty() && precedenceOf.get(x) <= precedenceOf.get(operators.peek()))
+                    postfix = postfix.concat(operators.pop() + "");
+
                 operators.push(x);
             }
         }
 
         while (!operators.isEmpty()) {
-            posfija = posfija.concat(operators.pop() + "");
+            postfix = postfix.concat(operators.pop() + "");
         }
 
-        return posfija;
+        return postfix;
     }
 
     public static boolean isValid(String expression) {
-        String normExpression = expression.toLowerCase();
         Stack<Integer> parenthesisStack = new Stack<>();
         boolean lastWasOperand = false;
-//        int parenthesisCounter = 0;
         int lastOperator = 0;
 
-        for (int i = 0; i < normExpression.length(); i++) {
-            char element = normExpression.charAt(i);
-//            parenthesisCounter++;
+        if (expression.isEmpty()) {
+            System.out.println("Error: Expression can't be empty!");
+            return false;
+        }
+
+        for (int i = 0; i < expression.length(); i++) {
+            char element = expression.charAt(i);
+
+            if (element == ' ')
+                continue;
+
             if (element == '(') {
                 parenthesisStack.push(i);
-                lastWasOperand = false;
+
+                if (lastWasOperand) {
+                    System.out.println(
+                            markErrorAt(expression, i, "Parenthesis can't be placed without an operator!")
+                    );
+                    return false;
+                }
             } else if (element == ')') {
-//                parenthesisCounter--;
-//                if (parenthesisCounter < 0) {
                 if (parenthesisStack.size() - 1 <= -1) {
                     System.out.println(
                             markErrorAt(expression,
@@ -70,24 +83,41 @@ public class Interpreter {
                                     expression.contains("(") ? "')' has no opening parenthesis!" : "Never found a '(' character!"));
                     return false;
                 }
+
+                if (!lastWasOperand) {
+                    System.out.println(
+                            markErrorAt(expression, i, "Expression is incomplete!")
+                    );
+                    return false;
+                }
+
                 parenthesisStack.pop();
+            } else if ((element >= 'a') && (element <= 'z')) {
+                if (lastWasOperand) {
+                    System.out.println(markErrorAt(expression, i, "Unexpected operand found! Expected: Operator"));
+                    return false;
+                }
+
                 lastWasOperand = true;
-            } else if ((element >= 'a') && (element <= 'z') && !lastWasOperand) {
-                lastWasOperand = true;
-            } else if ("+-*/^".contains(element + "") && lastWasOperand) {
+
+            } else if ("+-*/^".contains(element + "")) {
+                if (!lastWasOperand) {
+                    System.out.println(markErrorAt(expression, i, "Unexpected operator found! Expected: Operand"));
+                    return false;
+                }
+
                 lastWasOperand = false;
                 lastOperator = i;
-            } else if (element != ' ') {
+            } else {
                 System.out.println(markErrorAt(
                         expression,
                         i,
-                        lastWasOperand ? "Unexpected operand found! Expected: Operator" : "Unexpected operator found! Expected: Operand")
+                        "Invalid character found!")
                 );
                 return false;
             }
         }
 
-//        if (parenthesisCounter != 0) {
         if (!parenthesisStack.isEmpty()) {
             System.out.println(markErrorAt(
                     expression,
@@ -97,8 +127,7 @@ public class Interpreter {
             return false;
         }
 
-        if (!lastWasOperand)
-        {
+        if (!lastWasOperand) {
             System.out.println(markErrorAt(
                     expression,
                     lastOperator,
@@ -107,31 +136,28 @@ public class Interpreter {
             return false;
         }
 
+        System.out.println("Expression is valid!");
         return true;
     }
 
     public static void evaluateInfix(String expression) {
-        if (isValid(expression)) {
-            StringBuilder builder = new StringBuilder();
-            expression.toLowerCase().chars().forEach(c -> {
-                if (!builder.toString().contains((char) c + "") && (char) c >= 'a' && (char) c <= 'z')
-                    builder.append((char) c);
-            });
+        StringBuilder builder = new StringBuilder();
+        expression.chars().forEach(c -> {
+            if (!builder.toString().contains((char) c + "") && (char) c >= 'a' && (char) c <= 'z')
+                builder.append((char) c);
+        });
 
-            var charArray = builder.toString().toCharArray();
-            Arrays.sort(charArray);
-            var letters = new String(charArray);
+        var charArray = builder.toString().toCharArray();
+        Arrays.sort(charArray);
+        var letters = new String(charArray);
 
-            for (int i = 0; i < letters.length(); i++) {
-                System.out.printf("Give me the value of %s: %n", letters.charAt(i));
-                expression = expression.toLowerCase().replace(letters.charAt(i) + "", Integer.toString(ensureInt()));
-            }
-
-            System.out.printf("Result of %s: %.2f%n", expression, computeInfix(expression));
+        for (int i = 0; i < letters.length(); i++) {
+            System.out.printf("Give me the value of %s: %n", letters.charAt(i));
+            expression = expression.replace(letters.charAt(i) + "", Integer.toString(ensureInt()));
         }
-        else {
-            System.out.println("Expression is not valid!");
-        }
+
+        System.out.printf("Result of %s: %.2f%n", expression, computeInfix(expression));
+
     }
 
     private static int ensureInt() {
@@ -195,6 +221,7 @@ public class Interpreter {
                 if (b == 0) throw new ArithmeticException("Division by zero!");
                 yield a / b;
             }
+            case '^' -> Math.pow(a, b);
             default -> 0;
         };
     }

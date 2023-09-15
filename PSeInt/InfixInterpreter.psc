@@ -1,89 +1,77 @@
 SubAlgoritmo valido <- EsValido(expresion)
 	Definir valido Como Logico;
-	Definir ultimoParentesis Como Entero;
-	Definir contadorParentesis Como Entero;
-	Definir ultimoFueOperando Como Logico;
-	Definir ultimoOperando Como Entero;
-	Definir exprNormalizada Como Cadena;
-	Definir caracterActual Como Cadena;
 	Definir error Como Cadena;
+	Definir stackParentesis Como Pila;
+	Definir ultimoFueOperando Como Logico;
+	Definir ultimoOperador Como Entero;
 	
-	valido <- Verdadero;
+	Definir elemento Como Caracter;
+	
 	ultimoFueOperando <- Falso;
-	contadorParentesis <- 0;
-	ultimoParentesis <- 0;
 	ultimoOperador <- 0;
-	exprNormalizada <- Minusculas(expresion);
 	
-	Para i<-0 Hasta Longitud(exprNormalizada) Hacer
-		caracterActual <- caracterEn(exprNormalizada, i);
-		Si caracterActual='(' Entonces
-			contadorParentesis <- contadorParentesis + 1;
-			ultimoFueOperando <- Falso;
+	Si estaVacia(expresion) Entonces
+		Escribir "Error: La expresion no puede estar vacia!";
+		Regresa Falso;
+	FinSi
+	
+	Para i <- 0 Hasta Longitud(expresion) Hacer
+		elemento = caracterEn(expresion, i);
+		
+		Si elemento = ' ' Entonces
+			Continua;
+		FinSi
+		
+		Si elemento = '(' Entonces
+			push(stackParentesis, i);
+			
+			Si ultimoFueOperando Entonces
+				marcarErrorEn(expresion, i, "Los parentesis no pueden ser puestos sin un operador!");
+				Regresa Falso;
+			FinSi
+			
 		SiNo
-			Si caracterActual=')' Entonces
-				contadorParentesis <- contadorParentesis-1;
-				Si contadorParentesis<0 Entonces
-					Si contiene(exprNormalizada,'(') Entonces
-						error <- ') no tiene parentesis que lo abra';
+			Si elemento = ')' Entonces
+				Si Longitud(parentesisStack) - 1 <= -1 Entonces
+					
+					Si contiene(expresion, '(') Entonces
+						error <- ") no tiene un parentesis de apertura!";
 					SiNo
-						error <- 'Nunca se encontro un (';
+						error <- "Nunca se encontro un parentesis de apertura!";
 					FinSi
-					marcarErrorEn(expresion,i,error);
-					valido <- Falso;
+					
+					marcarErrorEn(expresion, i, error);
+					Regresa Falso;
 				FinSi
-			SiNo
-				Si caracterActual >= ASCII('a') Y caracterActual <= ASCII('z') Y NO ultimoFueOperando Entonces
-					ultimoFueOperando <- Verdadero;
-				SiNo
-					Si (caracterActual=ASCII('+') O caracterActual=ASCII('-') O caracterActual=ASCII('*') O caracterActual=ASCII('/') O caracterActual=ASCII('^')) Y ultimoFueOperando Entonces
-						ultimoFueOperando <- Falso;
-						ultimoOperador <- i;
-					SiNo
-						Si caracterActual<>ASCII(' ') Entonces
-							Si ultimoFueOperando Entonces
-								error <- 'Operando inesperado encontrado! Se esperaba operador';
-							SiNo
-								error <- 'Operador inesperado encontrado! Se esperaba operando';
-							FinSi
-							marcarErrorEn(expresion,i,error);
-							valido <- Falso;
-						FinSi
-					FinSi
+				
+				Si no ultimoFueOperando Entonces
+					marcarErrorEn(expresion, i, "La expresion no esta completa!");
+					Regresa Falso;
 				FinSi
+				
+				pop(parentesisStack);
 			FinSi
 		FinSi
+		
 	FinPara
 	
-	Si contadorParentesis <> 0 Entonces
-		marcarErrorEn(expresion,ultimoParentesis,'( no tiene un parentesis de cierre!');
-		valido <- Falso;
-	FinSi
-	
-	Si NO ultimoFueOperando Entonces
-		marcarErrorEn(expresion,ultimoParentesis,Concatenar('La expresion termina con operador! Operador encontrado: ',caracterEn(expresion, ultimoOperador)));
-		valido <- Falso;
-	FinSi
 FinSubAlgoritmo
 
 Proceso InfixInterpreter
+	Definir expresionInfija Como Cadena;
+	Definir expresionNormalizada Como Cadena;
+	Definir expresionPostfija Como Cadena;
 	
+	Hacer
+		Escribir "Escribe una expresion: ";
+		Leer ExpresionInfija;
+		expresionNormalizada <- expresionInfija;
+	Hasta Que valido(expresionNormalizada)
+	
+	Escribir "Expresion infija: ", expresionInfija;
+	evaluarInfijo(exprNormalizada);
+	
+	expresionPostfija <- infijaAPostfija(expresionNormalizada);
+	Escribir "Expresion postfija: ", expresionPostfija;
 FinProceso
 
-SubAlgoritmo loTiene <- contiene(string,busqueda)
-	Definir loTiene Como Logico;
-FinSubAlgoritmo
-
-SubAlgoritmo marcarErrorEn(expresion,posicion,error)
-	
-FinSubAlgoritmo
-
-SubAlgoritmo valorA <- ASCII(Caracter)
-	Definir valorA Como Entero;
-	valorA <- 0;
-FinSubAlgoritmo
-
-SubAlgoritmo char <- caracterEn(string,indice)
-	Definir char Como Cadena;
-	char <- SubCadena(string,indice,indice+1);
-FinSubAlgoritmo
