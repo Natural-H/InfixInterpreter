@@ -76,13 +76,18 @@ SubAlgoritmo valido <- EsValido(expresion)
 			FinSi
 		FinPara
 		
-		Si vacio(parentesisStack) Entonces
-			markErrorAt(
-			expression,
-			parenthesisStack.peek(),
-			"'(' has no closing parenthesis!");
+		Si no vacio(parentesisStack) Entonces
+			marcarErrorEn(expression, parenthesisStack.peek(), "( no tiene parentesis de cierre!");
+			Regresa Falso;
 		FinSi
-	
+		
+		Si no ultimoFueOperando Entonces
+			markErrorAt(expression, lastOperator, "Expresion termina con operador ", caracterEn(expresion, ultimoOperador), "!";
+			Regresa Falso;
+		FinSi
+		
+		Escribir "La expresion es valida!";
+		Regresa Verdadero;
 FinSubAlgoritmo
 
 Proceso InfixInterpreter
