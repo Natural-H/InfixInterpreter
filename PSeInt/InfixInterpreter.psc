@@ -90,6 +90,11 @@ SubAlgoritmo valido <- EsValido(expresion)
 		Regresa Verdadero;
 FinSubAlgoritmo
 
+SubAlgoritmo evaluarInfijo(expresion)
+	Definir builder Como Cadena;
+	
+FinSubAlgoritmo
+
 Proceso InfixInterpreter
 	Definir expresionInfija Como Cadena;
 	Definir expresionNormalizada Como Cadena;

@@ -18,7 +18,6 @@ public class Interpreter {
     static String infixToPostfix(String infix) {
         String postfix = "";
         Stack<Character> operators = new Stack<>();
-        infix = infix.toLowerCase();
 
         for (int i = 0; i < infix.length(); i++) {
             char x = infix.charAt(i);
