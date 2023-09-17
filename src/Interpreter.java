@@ -140,6 +140,26 @@ public class Interpreter {
     }
 
     public static void evaluateInfix(String expression) {
+        String lettersList = getSortedVariables(expression);
+        String expressionToShow = expression;
+
+        for (int i = 0; i < lettersList.length(); i++) {
+            System.out.printf("Give me the value of %s: %n", lettersList.charAt(i));
+
+            int numericValue = ensureInt();
+            expressionToShow = expressionToShow.replace(lettersList.charAt(i) + "",
+                    numericValue < 0 ? "(%d)".formatted(numericValue) :
+                            Integer.toString(numericValue));
+
+            expression = expression.replace(lettersList.charAt(i) + "",
+                    numericValue < 0 ? "(0 - %d)".formatted(-numericValue) :
+                            Integer.toString(numericValue));
+        }
+
+        System.out.printf("Result of %s: %.2f%n", expressionToShow, computeInfix(expression));
+    }
+
+    private static String getSortedVariables(String expression) {
         StringBuilder builder = new StringBuilder();
         expression.chars().forEach(c -> {
             if (!builder.toString().contains((char) c + "") && (char) c >= 'a' && (char) c <= 'z')
@@ -148,15 +168,7 @@ public class Interpreter {
 
         var charArray = builder.toString().toCharArray();
         Arrays.sort(charArray);
-        var letters = new String(charArray);
-
-        for (int i = 0; i < letters.length(); i++) {
-            System.out.printf("Give me the value of %s: %n", letters.charAt(i));
-            expression = expression.replace(letters.charAt(i) + "", Integer.toString(ensureInt()));
-        }
-
-        System.out.printf("Result of %s: %.2f%n", expression, computeInfix(expression));
-
+        return new String(charArray);
     }
 
     private static int ensureInt() {
@@ -177,6 +189,9 @@ public class Interpreter {
         for (int i = 0; i < expression.length(); i++) {
             char c = expression.charAt(i);
 
+            if (c == ' ')
+                continue;
+
             if (Character.isDigit(c)) {
                 StringBuilder num = new StringBuilder();
                 while (i < expression.length() && Character.isDigit(expression.charAt(i))) {
@@ -193,7 +208,7 @@ public class Interpreter {
                 }
                 operators.pop(); // Remove the '('
             } else if ("+-*/^".contains(c + "")) {
-                while (!operators.isEmpty() && hasHigherPrecedence(operators.peek(), c)) {
+                while (!operators.isEmpty() && hasHigherOrEqualPrecedence(operators.peek(), c)) {
                     values.push(applyOperator(operators.pop(), values.pop(), values.pop()));
                 }
                 operators.push(c);
@@ -207,8 +222,8 @@ public class Interpreter {
         return values.pop();
     }
 
-    private static boolean hasHigherPrecedence(char op1, char op2) {
-        return precedenceOf.get(op1) > precedenceOf.get(op2);
+    private static boolean hasHigherOrEqualPrecedence(char op1, char op2) {
+        return precedenceOf.get(op1) >= precedenceOf.get(op2);
     }
 
     private static double applyOperator(char operator, double b, double a) {

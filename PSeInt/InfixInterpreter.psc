@@ -82,7 +82,7 @@ SubAlgoritmo valido <- EsValido(expresion)
 		FinSi
 		
 		Si no ultimoFueOperando Entonces
-			markErrorAt(expression, lastOperator, "Expresion termina con operador ", caracterEn(expresion, ultimoOperador), "!";
+			markErrorAt(expression, lastOperator, "Expresion termina con operador ", caracterEn(expresion, ultimoOperador), "!");
 			Regresa Falso;
 		FinSi
 		
@@ -91,7 +91,36 @@ SubAlgoritmo valido <- EsValido(expresion)
 FinSubAlgoritmo
 
 SubAlgoritmo evaluarInfijo(expresion)
-	Definir builder Como Cadena;
+	Definir expresion Como Cadena;
+	Definir listaVariables Como Cadena;
+	Definir expresionParaMostrar Como Cadena;
+	
+	Definir valorNumerico Como Entero;
+	Definir reemplazo Como Cadena;
+	Definir reemplazoParaMostrar Como Cadena;
+	
+	listaVariables <- obtenerVariablesOrdenadas(expresion);
+	// Esta funcion debe devolver un String con las variables ordenadas
+	// Ejemplo:
+	// Entrada: "a + c - b"
+	// Retorno: "abc"
+	
+	expresionParaMostrar <- expresion;
+	
+	Para i <- 0 Hasta Longitud(listaVariables) Hacer
+		Escribir "Dame el valor para ", caracterEn(listaVariables, i), ": ";
+		Leer valorNumerico;
+		
+		Si valorNumerico < 0 Entonces
+			reemplazo <- Concatenar("(0 - ", valorNumerico, ")");
+			reemplazoParaMostrar <- Concatenar("(-" , valorNumerico, ")");
+		FinSi
+		
+		expresion <- reemplazar(caracterEn(listaVariables, i), reemplazo);
+		expresionParaMostrar <- reemplazar(caracterEn(listaVariables, i), reemplazoParaMostrar);
+		
+		Escribir "Resultado de ", expresionParaMostrar, ": ", calcularInfijo(expresion);
+	FinPara
 	
 FinSubAlgoritmo
 
