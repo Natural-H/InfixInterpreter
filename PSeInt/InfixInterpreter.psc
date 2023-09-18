@@ -124,6 +124,48 @@ SubAlgoritmo evaluarInfijo(expresion)
 	
 FinSubAlgoritmo
 
+SubAlgoritmo infijaToPostfija(expresion)
+	Definir postfija Como Cadena;
+	Definir operadores Como Pila;
+	Definir c Como Caracter;
+	
+	Para i <- 0 Hasta Longitud(expresion) Hacer
+		c <- caracterEn(expresion, i);
+		
+		Si c = ' ' Entonces
+			Continua;
+		FinSi
+		
+		Si (c >= 'a') Y (c <= 'z') Entonces
+			postfija <- Concatenar(postfija, c);
+		SiNo
+			Si c = '(' Entonces
+				push(operadores, c)
+			SiNo
+				Si c = ')' Entonces
+					Mientras no estaVacio(operadores) y obtenerTope(operadores) <> '(' Hacer
+						postfija <- Concatenar(postfija, pop(operadores));
+					FinMientras
+					
+					pop(operadores);
+				SiNo
+					Mientras no estaVacio(operadores) y prioridadDe(c) <= prioridadDe(obtenerTope(operadores)) Hacer
+						postfija <- Concatenar(postfija, pop(operadores));
+					FinMientras
+					
+					push(operadores, c);
+				FinSi
+			FinSi
+		FinSi
+	FinPara
+	
+	Mientras no estaVacio(operadores) Hacer
+		postfija <- Concatenar(postfija, pop(operadores));
+	FinMientras
+	
+	Regresa postfija;
+FinSubAlgoritmo
+
 Proceso InfixInterpreter
 	Definir expresionInfija Como Cadena;
 	Definir expresionNormalizada Como Cadena;
