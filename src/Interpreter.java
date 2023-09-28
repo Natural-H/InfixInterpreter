@@ -1,6 +1,4 @@
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Stack;
+import java.util.*;
 
 import static java.util.Map.entry;
 
@@ -14,6 +12,40 @@ public class Interpreter {
             entry('(', 0),
             entry(')', 0)
     );
+
+    static double evaluatePostfix(String postfix, HashMap<Character, Integer> mappedValues) {
+        Stack<Double> operands = new Stack<>();
+
+        for (int i = 0; i < postfix.length(); i++) {
+            char c = postfix.charAt(i);
+
+            if (c >= 'a' && c <= 'z')
+                operands.push(Double.valueOf(mappedValues.get(c)));
+            else if ("+-*/^".contains(c + ""))
+                operands.push(applyOperator(c, operands.pop(), operands.pop()));
+        }
+
+        return operands.pop();
+    }
+
+    static double evaluatePrefix(String prefix, HashMap<Character, Integer> mappedValues) {
+        Stack<Character> operators = new Stack<>();
+        Stack<Double> operands = new Stack<>();
+
+        for (int i = 0; i < prefix.length(); i++) {
+            char c = prefix.charAt(i);
+
+            if (c >= 'a' && c <= 'z') {
+                operands.push(Double.valueOf(mappedValues.get(c)));
+                if (operands.size() >= 2) {
+                    operands.push(applyOperator(operators.pop(), operands.pop(), operands.pop()));
+                }
+            } else if ("+-*/^".contains(c + ""))
+                operators.push(c);
+        }
+
+        return operands.pop();
+    }
 
     static String infixToPostfix(String infix) {
         String postfix = "";
@@ -47,6 +79,41 @@ public class Interpreter {
         }
 
         return postfix;
+    }
+
+    static String infixToPrefix(String infix) {
+        String prefix = "";
+        Stack<Character> operators = new Stack<>();
+
+        for (int i = infix.length() - 1; i >= 0; i--) {
+            char x = infix.charAt(i);
+
+            if (x == ' ')
+                continue;
+
+            if ((x >= 'a' && x <= 'z'))
+                prefix = prefix.concat(x + "");
+            else if (x == ')')
+                operators.push(x);
+            else if (x == '(') {
+                while (!operators.isEmpty() && operators.peek() != ')')
+                    prefix = prefix.concat(operators.pop() + "");
+
+                operators.pop();
+            } else {
+                while (!operators.isEmpty() && precedenceOf.get(x) <= precedenceOf.get(operators.peek()))
+                    prefix = prefix.concat(operators.pop() + "");
+
+                operators.push(x);
+            }
+        }
+
+        while (!operators.isEmpty()) {
+            prefix = prefix.concat(operators.pop() + "");
+        }
+
+        prefix = new StringBuilder(prefix).reverse().toString();
+        return prefix;
     }
 
     public static boolean isValid(String expression) {
@@ -159,7 +226,7 @@ public class Interpreter {
         System.out.printf("Result of %s: %.2f%n", expressionToShow, computeInfix(expression));
     }
 
-    private static String getSortedVariables(String expression) {
+    public static String getSortedVariables(String expression) {
         StringBuilder builder = new StringBuilder();
         expression.chars().forEach(c -> {
             if (!builder.toString().contains((char) c + "") && (char) c >= 'a' && (char) c <= 'z')
@@ -171,7 +238,18 @@ public class Interpreter {
         return new String(charArray);
     }
 
-    private static int ensureInt() {
+    public static List<Character> yeah(String expression) {
+        ArrayList<Character> characters = new ArrayList<>();
+        expression.chars().forEach(c -> {
+            if (!characters.contains((char) c) && c >= 'a' && c <= 'z') {
+                characters.add((char) c);
+            }
+        });
+
+        return characters.stream().sorted().toList();
+    }
+
+    public static int ensureInt() {
         int value;
         try {
             value = Main.sc.nextInt();

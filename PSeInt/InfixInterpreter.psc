@@ -1,5 +1,4 @@
-SubAlgoritmo valido <- EsValido(expresion)
-	Definir valido Como Logico;
+SubAlgoritmo EsValido(expresion) -> Logico
 	Definir error Como Cadena;
 	Definir stackParentesis Como Pila;
 	Definir ultimoFueOperando Como Logico;
@@ -100,7 +99,11 @@ SubAlgoritmo evaluarInfijo(expresion)
 	Definir reemplazoParaMostrar Como Cadena;
 	
 	listaVariables <- obtenerVariablesOrdenadas(expresion);
-	// Esta funcion debe devolver un String con las variables ordenadas
+	// La funcion "obtenerVariablesOrdenadas()" debe devolver un String con las variables ordenadas
+	// Primero se deben filtrar las letras de la expesion, para eso, primero debes crear una lista vacía, luego recorrer la expresión,
+	// cuando se encuentre con un operando, si la lista esta vacia, lo guarda, si no lo esta, entonces busca si en la lista existe ese
+	// operando, 
+	//
 	// Ejemplo:
 	// Entrada: "a + c - b"
 	// Retorno: "abc"
@@ -124,7 +127,7 @@ SubAlgoritmo evaluarInfijo(expresion)
 	
 FinSubAlgoritmo
 
-SubAlgoritmo infijaToPostfija(expresion)
+SubAlgoritmo infijaToPostfija(expresion) -> Cadena
 	Definir postfija Como Cadena;
 	Definir operadores Como Pila;
 	Definir c Como Caracter;
@@ -161,6 +164,48 @@ SubAlgoritmo infijaToPostfija(expresion)
 	
 	Mientras no estaVacio(operadores) Hacer
 		postfija <- Concatenar(postfija, pop(operadores));
+	FinMientras
+	
+	Regresa postfija;
+FinSubAlgoritmo
+
+SubAlgoritmo infijaToPrefija(expresion) -> Cadena
+	Definir prefija Como Cadena;
+	Definir operadores Como Pila;
+	Definir c Como Caracter;
+	
+	Para i <- Longitud(expresion) Hasta 0 Con Paso -1 Hacer
+		c <- caracterEn(expresion, i);
+		
+		Si c = ' ' Entonces
+			Continua;
+		FinSi
+		
+		Si (c >= 'a') Y (c <= 'z') Entonces
+			prefija <- Concatenar(prefija, c);
+		SiNo
+			Si c = ')' Entonces
+				push(operadores, c)
+			SiNo
+				Si c = '(' Entonces
+					Mientras no estaVacio(operadores) y obtenerTope(operadores) <> ')' Hacer
+						prefija <- Concatenar(prefija, pop(operadores));
+					FinMientras
+					
+					pop(operadores);
+				SiNo
+					Mientras no estaVacio(operadores) y prioridadDe(c) <= prioridadDe(obtenerTope(operadores)) Hacer
+						prefija <- Concatenar(prefija, pop(operadores));
+					FinMientras
+					
+					push(operadores, c);
+				FinSi
+			FinSi
+		FinSi
+	FinPara
+	
+	Mientras no estaVacio(operadores) Hacer
+		prefija <- Concatenar(prefija, pop(operadores));
 	FinMientras
 	
 	Regresa postfija;
