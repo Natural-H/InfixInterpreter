@@ -1,0 +1,324 @@
+Algoritmo Intérprete
+    Definir normalizada como Cadena;
+    Definir valoresMapeados como HashMap de Caracter a Entero;
+    
+    Repetir
+        Escribir "Dame una expresión: ";
+        Leer infija;
+        normalizada = minusculas(infija);
+    Hasta que esValido(normalizada)
+
+    Escribir "Expresión infija: ", infija;
+
+    Definir posfija como Cadena;
+    posfija <- infijaAPosfija(normalizada);
+    Escribir "Expresión Posfija: ", posfija;
+
+    Definir prefija como Cadena;
+    prefija <- infijaAPrefija(normalizada);
+    Escribir "Expresión Prefija: ", prefija;
+
+    Escribir "Evaluando...";
+    // La función "obtenerVariables()" debe devolver una Lista de carácteres con las variables ordenadas
+	// Primero se deben filtrar las letras de la expesión, para eso, primero se debe crear una lista vacía, luego recorrer la expresión carácter por carácter,
+	// cuando se encuentre con un operando, si dicha lista está vacía, lo guarda, si no lo está, entonces busca si en la lista existe ese
+	// operando, en caso de existir, no lo guarda, pero si no existe, entonces lo guarda. Cuando ya haya terminado de leer la expresión,
+    // los valores de la lista los ordenará alfabéticamente, y devolverá esa lista.
+	//
+	// Ejemplo:
+	// Entrada: "a + c - b"
+	// Retorno: ['a', 'b', 'c']
+    Definir lista como Lista de Caracter;
+    lista <- obtenerVariables(normalizada);
+
+    Para i <- 0 Hasta longitud(lista) - 1 Con paso 1 Hacer
+        Definir c como Caracter;
+        Definir entrada como Entero;
+
+        c <- lista.obtener(i);
+        Escribir "Deme el valor para ", c, ": ";
+        valoresMapeados.añadir(c, entrada);
+    FinPara
+
+    Escribir evaluarInfija(normalizada, valoresMapeados);
+    Escribir evaluarPosfija(posfija, valoresMapeados);
+    Escribir evaluarPrefija(prefija, valoresMapeados);
+FinAlgoritmo
+
+Subalgoritmo esValido(expresion) <- Logico
+    Definir pilaParentesis como Pila de Entero;
+    Definir ultimoFueOperando como Logico;
+    Definir ultimoOperador como Entero;
+
+    Definir error como Cadena;
+
+    ultimoFueOperando <- Falso;
+    ultimoOperador <- 0;
+
+    Si vacio(expresion) Entonces
+        Escribir "Error: La expresión no puede estar vacía";
+        Regresa Falso;
+    FinSi
+
+    Para i <- 0 Hasta longitud(expresion) - 1 Con paso 1 Hacer
+        Definir c como Caracter;
+        c <- caracterEn(expresion, i);
+
+        Si c = ' ' Entonces
+            Continua;
+        FinSi
+
+        Si c = '(' Entonces
+            push(pilaParentesis, i);
+
+            Si ultimoFueOperando Entonces
+                marcarErrorEn(expresion, i, "¡No se puede poner un paréntesis sin un operador!");
+                Regresa Falso;
+            FinSi
+        SiNo
+            Si c = ')' Entonces
+                Si vacio(pilaParentesis) Entonces
+                    Si contiene(expresion, '(') Entonces
+                        error <- "¡')' no tiene paréntesis de cierre!"
+                    SiNo
+                        error <- "¡Nunca se encontró un '('!"
+                    FinSi
+
+                    marcarErrorEn(expresion, i, error);
+                    Regresa Falso;
+                FinSi
+
+                Si No ultimoFueOperando Entonces
+                    marcarErrorEn(expresion, i, "¡Expresión incompleta!");
+                    Regresa Falso;
+                FinSi
+
+                pop(pilaParentesis);
+            SiNo
+                Si esOperando(c) Entonces
+                    Si ultimoFueOperando Entonces
+                        marcarErrorEn(expresion, i, "¡No se esperaba operando! Se esperaba: operador");
+                        Regresa Falso;
+                    FinSi
+
+                    ultimoFueOperando <- Verdadero;
+                SiNo
+                    Si esOperador(c) Entonces
+                        Si No ultimoFueOperando Entonces
+                            marcarErrorEn(expresion, i, "¡No se esperaba operador! Se esperaba: operando");
+                            Regresa Falso;
+                        FinSi
+
+                        ultimoFueOperando <- Falso;
+                        ultimoOperador <- i;
+                    SiNo
+                        marcarErrorEn(expresion, i, "¡Se encontró un carácter no válido!");
+                        Regresa Falso;
+                    FinSi
+                FinSi
+            FinSi
+        FinSi
+
+        Si No vacio(pilaParentesis) Entonces
+            marcarErrorEn(expresion, peek(pilaParentesis), "¡'(' no tiene paréntesis de cierre!");
+            Regresa Falso;
+        FinSi
+
+        Si No ultimoFueOperando Entonces
+            marcarErrorEn(expresion, ultimoOperador, "¡La expresión no puede terminar con un operador!");
+            Regresa Falso;
+        FinSi
+
+        Escribir "¡La expresión es válida!";
+        Regresa Verdadero;
+    FinPara
+FinSubalgoritmo
+
+Subalgoritmo infijaAPosfija(expresion) <- Cadena
+    Definir posfija como Cadena;
+    Definir pilaOperadores como Pila de Caracter;
+
+    posfija <- "";
+
+    Para i <- 0 Hasta longitud(expresion) - 1 Con paso 1 Hacer
+        Definir c como Caracter;
+        c <- caracterEn(expresion, i);
+
+        Si c = ' ' Entonces
+            Continua;
+        FinSi
+
+        Si esOperando(c) Entonces
+            posfija <- concatenar(posfija, c);
+            Si c = '(' Entonces
+                push(pilaOperadores, c);
+            SiNo
+                Si c = ')' Entonces
+                    Mientras No vacio(pilaOperadores) y peek(pilaOperadores) != '(' Hacer
+                        posfija <- concatenar(pop(pilaOperadores));
+                    FinMientras
+
+                    pop(pilaOperadores);
+                SiNo
+                    Mientras No vacio(pilaOperadores) y jerarquiaDe(c) <= jerarquiaDe(peek(pilaOperadores)) Hacer
+                        posfija <- concatenar(pop(pilaOperadores));
+                    FinMientras
+                FinSi
+            FinSi
+        FinSi
+    FinPara
+
+    Mientras No vacio(pilaOperadores) Hacer
+        posfija <- pop(pilaOperadores);
+    FinMientras
+
+    Regresa posfija;
+FinSubalgoritmo
+
+Subalgoritmo infijaAPrefija(expresion) <- Cadena
+    Definir prefija como Cadena;
+    Definir pilaOperadores como Pila de Caracter;
+
+    prefija <- "";
+
+    Para i <- longitud(expresion) Hasta 0 Con paso -1 Hacer
+        Definir c como Caracter;
+        c <- caracterEn(expresion, i);
+
+        Si c = ' ' Entonces
+            Continua;
+        FinSi
+
+        Si esOperando(c) Entonces
+            prefija <- concatenar(prefija, c);
+            Si c = ')' Entonces
+                push(pilaOperadores, c);
+            SiNo
+                Si c = '(' Entonces
+                    Mientras No vacio(pilaOperadores) y peek(pilaOperadores) != ')' Hacer
+                        prefija <- concatenar(pop(pilaOperadores));
+                    FinMientras
+
+                    pop(pilaOperadores);
+                SiNo
+                    Mientras No vacio(pilaOperadores) y jerarquiaDe(c) <= jerarquiaDe(peek(pilaOperadores)) Hacer
+                        prefija <- concatenar(pop(pilaOperadores));
+                    FinMientras
+                FinSi
+            FinSi
+        FinSi
+    FinPara
+
+    Mientras No vacio(pilaOperadores) Hacer
+        prefija <- pop(pilaOperadores);
+    FinMientras
+
+    prefija <- invertirCadena(prefija);
+    Regresa prefija;
+FinSubalgoritmo
+
+Subalgoritmo evaluarPosfija(posfija, valoresMapeados) <- Real
+    Definir pilaOperandos como Pila de Real;
+
+    Para i <- 0 Hasta longitud(posfija) - 1 Con paso 1 Hacer
+        Definir c como Caracter;
+        c <- caracterEn(posfija, i);
+
+        Si esOperando(c) Entonces
+            push(pilaOperandos, convertirAReal(valoresMapeados.obtener(c)));
+        SiNo
+            Si esOperador(c) Entonces
+                push(pilaOperandos, aplicarOperador(c, pop(pilaOperandos), pop(pilaOperandos)));
+            FinSi
+        FinSi
+    FinPara
+
+    Regresa pop(pilaOperandos);
+FinSubalgoritmo
+
+Subalgoritmo evaluarInfija(infija, valoresMapeados) <- Real
+    Definir pilaOperandos como Pila de Real;
+    Definir pilaOperadores como Pila de Real;
+
+    Para i <- longitud(infija) Hasta 0 Con paso -1 Hacer
+        Definir c como Caracter;
+        c <- caracterEn(infija, i);
+
+        Si esOperando(c) Entonces
+            push(pilaOperandos, convertirAReal(valoresMapeados.obtener(c)));
+        SiNo
+            Si esOperador(c) Entonces
+            push(pilaOperadores, c);
+            
+            Si longitud(pilaOperandos) >= 2 Entonces
+                Definir a como Real;
+                Definir b como Real;
+
+                a <- pop(pilaOperandos);
+                b <- pop(pilaOperandos);
+
+                push(pilaOperandos, aplicarOperador(pop(pilaOperadores), b, a));
+            FinSi
+
+            FinSi
+        FinSi
+    FinPara
+
+    Mientras no vacio(pilaOperadores) Hacer
+        Definir a como Real;
+        Definir b como Real;
+
+        a <- pop(pilaOperandos);
+        b <- pop(pilaOperandos);
+
+        push(pilaOperandos, aplicarOperador(pop(pilaOperadores), b, a));
+    FinMientras
+
+    Regresa pop(pilaOperandos);
+FinSubalgoritmo
+
+Subalgoritmo aplicarOperador(operador, b, a) <- Real
+    Segun operador Hacer
+    '+':
+        Regresa a + b;
+    '-':
+        Regresa a - b;
+    '*':
+        Regresa a * b;
+    '/':
+        Regresa a / b;
+    '^':
+        Regresa a ^ b;
+    De otro modo:
+        Regresa 0;
+FinSubalgoritmo
+
+Subalgoritmo jerarquiaDe(caracter) <- Entero
+    Segun caracter Hacer
+    '+':
+    '-':
+        Regresa 1;
+    '*':
+    '/':
+        Regresa 2;
+    '^':
+        Regresa 3;
+    De otro modo:
+        Regresa 0;
+FinSubalgoritmo
+
+Subalgoritmo esOperando(caracter) <- Logico
+    Regresa caracter >= 'a' y caracter <= 'z';
+FinSubalgoritmo
+
+Subalgoritmo esOperador(caracter) <- Logico
+    Regresa caracter = '+' o caracter = '-' o caracter = '*' o caracter = '/' o caracter = '^';
+FinSubalgoritmo
+
+Subalgoritmo marcarErrorEn(expresion, indice, error)
+    Escribir "Error: ", error;
+    Escribir subcadena(expresion, 0, indice), "'", caracterEn(expresion, indice), "'", subcadena(expresion, indice + 1);
+    Escribir repetir(" ", indice), "^";
+    Escribir repetir(" ", indice), "|";
+    Escribir repetir(" ", indice), "|";
+FinSubalgoritmo

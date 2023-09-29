@@ -7,7 +7,7 @@ public class Main {
     public static void main(String[] args) {
         String infixExpression, normExpression;
         do {
-            System.out.print("Give me an expression: ");
+            System.out.print("Dame una expresión: ");
             infixExpression = sc.nextLine();
             normExpression = infixExpression.toLowerCase();
         } while (!Interpreter.isValid(normExpression));
@@ -21,15 +21,16 @@ public class Main {
         System.out.println("Expresión prefija: " + prefix);
 
         System.out.println("Evaluando...");
-//        Interpreter.evaluateInfix(normExpression);
-
         var mapped = new HashMap<Character, Integer>();
 
-        for (Character a : Interpreter.yeah(normExpression)) {
-            mapped.put(a, Interpreter.ensureInt());
+        for (Character c : Interpreter.getOrderedVars(normExpression)) {
+            System.out.println("Dame el valor para " + c + ": ");
+            mapped.put(c, Interpreter.ensureInt());
         }
 
+        System.out.println(Interpreter.evaluateInfix(normExpression, mapped));
         System.out.println(Interpreter.evaluatePostfix(postfix, mapped));
+        System.out.println(Interpreter.evaluatePrefix(prefix, mapped));
 
         sc.close();
     }
