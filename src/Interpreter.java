@@ -27,9 +27,8 @@ public class Interpreter {
             } else if (c == ')') {
                 if (parenthesisStack.isEmpty()) {
                     markErrorAt(expression, i,
-                            expression.contains("(") ?
-                                    "')' has no opening parenthesis!" :
-                                    "Never found a '(' character!");
+                            expression.contains("(") ? "')' has no opening parenthesis!"
+                                    : "Never found a '(' character!");
                     return false;
                 }
 
@@ -144,8 +143,8 @@ public class Interpreter {
     }
 
     public static double evaluateInfix(String expression, HashMap<Character, Integer> mappedValues) {
-        Stack<Double> values = new Stack<>();
-        Stack<Character> operators = new Stack<>();
+        Stack<Double> operandsStack = new Stack<>();
+        Stack<Character> operatorsStack = new Stack<>();
 
         for (int i = 0; i < expression.length(); i++) {
             char c = expression.charAt(i);
@@ -154,23 +153,24 @@ public class Interpreter {
                 continue;
 
             if (isOperand(c))
-                values.push(Double.valueOf(mappedValues.get(c)));
-            else if (c == '(') operators.push(c);
+                operandsStack.push(Double.valueOf(mappedValues.get(c)));
+            else if (c == '(')
+                operatorsStack.push(c);
             else if (c == ')') {
-                while (!operators.isEmpty() && operators.peek() != '(')
-                    values.push(applyOperator(operators.pop(), values.pop(), values.pop()));
-                operators.pop();
+                while (!operatorsStack.isEmpty() && operatorsStack.peek() != '(')
+                    operandsStack.push(applyOperator(operatorsStack.pop(), operandsStack.pop(), operandsStack.pop()));
+                operatorsStack.pop();
             } else if (isOperator(c)) {
-                while (!operators.isEmpty() && precedenceOf(operators.peek()) >= precedenceOf(c))
-                    values.push(applyOperator(operators.pop(), values.pop(), values.pop()));
-                operators.push(c);
+                while (!operatorsStack.isEmpty() && precedenceOf(operatorsStack.peek()) >= precedenceOf(c))
+                    operandsStack.push(applyOperator(operatorsStack.pop(), operandsStack.pop(), operandsStack.pop()));
+                operatorsStack.push(c);
             }
         }
 
-        while (!operators.isEmpty())
-            values.push(applyOperator(operators.pop(), values.pop(), values.pop()));
+        while (!operatorsStack.isEmpty())
+            operandsStack.push(applyOperator(operatorsStack.pop(), operandsStack.pop(), operandsStack.pop()));
 
-        return values.pop();
+        return operandsStack.pop();
     }
 
     static double evaluatePostfix(String postfix, HashMap<Character, Integer> mappedValues) {
@@ -189,31 +189,31 @@ public class Interpreter {
     }
 
     static double evaluatePrefix(String prefix, HashMap<Character, Integer> mappedValues) {
-        Stack<Character> operators = new Stack<>();
-        Stack<Double> operands = new Stack<>();
+        Stack<Character> operatorsStack = new Stack<>();
+        Stack<Double> operandsStack = new Stack<>();
 
         for (int i = prefix.length() - 1; i >= 0; i--) {
             char c = prefix.charAt(i);
 
             if (isOperand(c))
-                operands.push(Double.valueOf(mappedValues.get(c)));
+                operandsStack.push(Double.valueOf(mappedValues.get(c)));
             else if (isOperator(c)) {
-                operators.push(c);
-                if (operands.size() >= 2) {
-                    double a = operands.pop();
-                    double b = operands.pop();
-                    operands.push(applyOperator(operators.pop(), b, a));
+                operatorsStack.push(c);
+                if (operandsStack.size() >= 2) {
+                    double a = operandsStack.pop();
+                    double b = operandsStack.pop();
+                    operandsStack.push(applyOperator(operatorsStack.pop(), b, a));
                 }
             }
         }
 
-        while (!operators.isEmpty()) {
-            double a = operands.pop();
-            double b = operands.pop();
-            operands.push(applyOperator(operators.pop(), b, a));
+        while (!operatorsStack.isEmpty()) {
+            double a = operandsStack.pop();
+            double b = operandsStack.pop();
+            operandsStack.push(applyOperator(operatorsStack.pop(), b, a));
         }
 
-        return operands.pop();
+        return operandsStack.pop();
     }
 
     public static int precedenceOf(Character character) {
@@ -270,7 +270,8 @@ public class Interpreter {
             case '*':
                 return a * b;
             case '/':
-                if (b == 0) throw new ArithmeticException("Division by zero!");
+                if (b == 0)
+                    throw new ArithmeticException("Division by zero!");
                 return a / b;
             case '^':
                 return Math.pow(a, b);
@@ -281,7 +282,8 @@ public class Interpreter {
 
     static void markErrorAt(String expression, int index, String error) {
         System.out.println("Error: " + error);
-        System.out.println(expression.substring(0, index) + "'" + expression.charAt(index) + "'" + expression.substring(index + 1));
+        System.out.println(expression.substring(0, index) + "'" + expression.charAt(index) + "'"
+                + expression.substring(index + 1));
         System.out.println(" ".repeat(index) + '^');
         System.out.println(" ".repeat(index) + '|');
         System.out.println(" ".repeat(index) + '|');

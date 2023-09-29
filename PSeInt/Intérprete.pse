@@ -277,6 +277,49 @@ Subalgoritmo evaluarInfija(infija, valoresMapeados) <- Real
     Regresa pop(pilaOperandos);
 FinSubalgoritmo
 
+Subalgoritmo evaluarInfija(expresion, valoresMapeados) <- retorno
+    Definir pilaOperandos como Pila de Real;
+    Definir pilaOperadores como Pila de Caracter;
+
+    Para i <- 0 Hasta longitud(expresion) - 1 Con paso 1 Hacer
+        Definir c como Caracter;
+        c <- caracterEn(expresion, i);
+
+        Si c = ' ' Entonces
+            Continua;
+        FinSi
+
+        Si esOperando(c) Entonces
+            push(pilaOperandos, valoresMapeados.obtener(c));
+        SiNo
+            Si c = '(' Entonces
+                push(pilaOperadores, c);
+            SiNo
+                Si c = ')' Entonces
+                    Mientras No vacio(pilaOperadores) y peek(pilaOperadores) != '(' Hacer
+                        push(pilaOperandos, pop(pilaOperadores), pop(pilaOperandos), pop(pilaOperandos));
+                    FinMientras
+                    pop(pilaOperadores);
+                SiNo
+                    Si esOperador(c) Entonces
+                        Mientras No vacio(pilaOperadores) y jerarquiaDe(peek(pilaOperadores)) >= jerarquiaDe(c) Hacer
+                            push(pilaOperandos, aplicarOperador(pop(pilaOperadores), pop(pilaOperandos), pop(pilaOperandos)));
+                        FinMientras
+
+                        push(pilaOperadores, c);
+                    FinSi
+                FinSi
+            FinSi
+        FinSi
+    FinPara
+
+    Mientras no vacio(pilaOperadores) Hacer
+        push(pilaOperandos, aplicarOperador(pop(pilaOperadores), pop(pilaOperandos), pop(pilaOperandos)));
+    FinMientras
+
+    Regresa pop(pilaOperadores);
+FinSubalgoritmo
+
 Subalgoritmo aplicarOperador(operador, b, a) <- Real
     Segun operador Hacer
     '+':
