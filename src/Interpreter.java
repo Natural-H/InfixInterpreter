@@ -199,7 +199,7 @@ public class Interpreter {
                 operandsStack.push(Double.valueOf(mappedValues.get(c)));
             else if (isOperator(c)) {
                 operatorsStack.push(c);
-                if (operandsStack.size() >= 2) {
+                if (operandsStack.getSize() >= 2) {
                     double a = operandsStack.pop();
                     double b = operandsStack.pop();
                     operandsStack.push(applyOperator(operatorsStack.pop(), b, a));
