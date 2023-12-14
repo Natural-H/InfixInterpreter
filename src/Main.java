@@ -12,13 +12,17 @@ public class Main {
             normExpression = infixExpression.toLowerCase();
         } while (!Interpreter.isValid(normExpression));
 
+        System.out.println("\n--------------------------------------------------\n");
         System.out.println("Expresión infija: " + infixExpression);
 
+        System.out.println("\n--------------------------------------------------\n");
         String postfix = Interpreter.infixToPostfix(normExpression);
         System.out.println("Expresión posfija: " + postfix);
+        System.out.println("\n--------------------------------------------------\n");
 
         String prefix = Interpreter.infixToPrefix(normExpression);
         System.out.println("Expresión prefija: " + prefix);
+        System.out.println("\n--------------------------------------------------\n");
 
         System.out.println("Evaluando...");
         var mapped = new HashMap<Character, Integer>();
@@ -28,9 +32,13 @@ public class Main {
             mapped.put(c, Interpreter.ensureInt());
         }
 
-        System.out.println(Interpreter.evaluateInfix(normExpression, mapped));
-        System.out.println(Interpreter.evaluatePostfix(postfix, mapped));
-        System.out.println(Interpreter.evaluatePrefix(prefix, mapped));
+        System.out.println("\n--------------------------------------------------\n");
+        System.out.printf("Resultado de la evaluación Infija: %.2f", Interpreter.evaluateInfix(normExpression, mapped));
+        System.out.println("\n--------------------------------------------------\n");
+        System.out.printf("Resultado de la evaluación Postfija: %.2f", Interpreter.evaluatePostfix(postfix, mapped));
+        System.out.println("\n--------------------------------------------------\n");
+        System.out.printf("Resultado de la evaluación Prefija: %.2f", Interpreter.evaluatePrefix(prefix, mapped));
+        System.out.println("\n--------------------------------------------------\n");
 
         sc.close();
     }
