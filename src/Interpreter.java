@@ -77,7 +77,7 @@ public class Interpreter {
 
         if (!lastWasOperand) {
             markErrorAt(expression, lastOperator,
-                    "¡La no puede terminar con un operador ('" + expression.charAt(lastOperator) + "')!");
+                    "¡La expresión no puede terminar con un operador ('" + expression.charAt(lastOperator) + "')!");
             return false;
         }
 
@@ -155,7 +155,7 @@ public class Interpreter {
                 System.out.println("Fue paréntesis de cierre.");
                 operators.push(c);
             } else if (c == '(') {
-                System.out.println("Fue paréntesis de cierre.");
+                System.out.println("Fue paréntesis de apertura.");
                 while (!operators.isEmpty() && operators.peek() != ')') {
                     prefix = prefix.concat(operators.pop() + "");
                     System.out.println("Se concatena el operador entre paréntesis. Expresión: " + prefix);
@@ -222,7 +222,7 @@ public class Interpreter {
                 System.out.println("Es paréntesis de apertura.");
                 operatorsCustomStack.push(c);
             } else if (c == ')') {
-                System.out.println("Es paréntesis de cierre");
+                System.out.println("Es paréntesis de cierre.");
                 while (!operatorsCustomStack.isEmpty() && operatorsCustomStack.peek() != '(') {
                     operandsCustomStack.push(
                             applyOperator(

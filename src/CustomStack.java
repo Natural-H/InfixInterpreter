@@ -85,11 +85,11 @@ public class CustomStack<T> {
 
     private void logPushing(T element) {
         System.out.println(name + ": Se añadió el elemento: " + element);
-        System.out.println("Cola actual: " + this);
+        System.out.println("Pila actual: " + this);
     }
 
     private void logPopping(T element) {
         System.out.println(name + ": Se quitó el elemento: " + element);
-        System.out.println("Cola actual: " + this);
+        System.out.println("Pila actual: " + this);
     }
 }
